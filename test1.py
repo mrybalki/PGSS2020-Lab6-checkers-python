@@ -1,4 +1,5 @@
 import numpy as np
+
 gameOn = True
 cmdDictionary = {"help": "helpCmd()", #list of user commands
                  "quit": "gameOn = False",
