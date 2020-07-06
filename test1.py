@@ -32,12 +32,12 @@ def createBackground(): #creates background for the board
 
 def setUpPieces(): #creates 8x8 array of piece chars
     pieceOutput = np.full((8,8), " ")
-    pieceOutput[0,1::2] = "o"
-    pieceOutput[1,::2] = "o"
-    pieceOutput[2,1::2] = "o"
-    pieceOutput[5,::2] = "a"
-    pieceOutput[6,1::2] = "a"
-    pieceOutput[7,::2] = "a"
+    pieceOutput[0,1::2] = "B"
+    pieceOutput[1,::2] = "B"
+    pieceOutput[2,1::2] = "B"
+    pieceOutput[5,::2] = "R"
+    pieceOutput[6,1::2] = "R"
+    pieceOutput[7,::2] = "R"
     return pieceOutput
 
 def checkOnePieceMoves(piecePositions,coords):
