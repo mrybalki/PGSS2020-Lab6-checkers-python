@@ -40,12 +40,34 @@ def setUpPieces(): #creates 8x8 array of piece chars
     pieceOutput[7,::2] = "a"
     return pieceOutput
 
+def checkOnePieceMoves(piecePositions,coords):
+  pieceColor = piecePositions[coords[0],coords[1]]
+  emptyAdjacent = []
+  pieceX = coords[1]
+  pieceY = coords[0]
+  for xOffset in range(-1,2,2): 
+     try:
+       if pieceColor == "R" and piecePositions[pieceY-1,pieceX+xOffset] == " " and pieceX+xOffset >= 0: #if this is a legal move for red and the legal move is on the board
+         print("testing coords: "+str(pieceY-1)+","+str(pieceX+xOffset))
+         emptyAdjacent.append((pieceY,pieceX,pieceY-1,pieceX+xOffset)) #append the piece and a possible location
+     except: #a possible peice's location has a coordinate 8 (off the board)
+       continue #don't add anything to legal moves
+     try:
+       if pieceColor == "B" and piecePositions[pieceY+1,pieceX+xOffset] == " " and pieceX+xOffset >= 0: #if this is a legal move for black and the legal move is on the board
+         print("testing coords: "+str(pieceY+1)+","+str(pieceX+xOffset))
+         emptyAdjacent.append((pieceY,pieceX,pieceY+1,pieceX+xOffset)) #append the piece and a possible location
+     except: #a possible peice's location has a coordinate 8 (off the board)
+       continue #don't add anything to legal moves
+  print(emptyAdjacent)
+#possible moves are stored in the following format:
+#piece's current Y, piece's current X, piece's possible new Y, piece's possible new X
+#each move is a list containing that information, so emptyAdjacent is a list of lists
+  
 #user commands from here on
 def helpCmd():
     print("COMMANDS:\n    quit: closes game\n    rules: prints rules\n    start game: starts a game\n    display starting board: displays a chess board with pieces in their starting positions(temporary command)\n    display empty board: displayes an empty chess board(temporary command)")
 
 def rulesCmd():
-
     print("chessbot: the rules for our checkers game should be here")
 
 def startCmd():
