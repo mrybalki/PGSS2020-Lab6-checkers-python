@@ -48,19 +48,18 @@ def checkOnePieceMoves(piecePositions,coords):
   for xOffset in range(-1,2,2): 
      try:
        if pieceColor == "R" and piecePositions[pieceY-1,pieceX+xOffset] == " " and pieceX+xOffset >= 0: #if this is a legal move for red and the legal move is on the board
-         print("testing coords: "+str(pieceY-1)+","+str(pieceX+xOffset))
          emptyAdjacent.append((pieceY,pieceX,pieceY-1,pieceX+xOffset)) #append the piece and a possible location
      except: #a possible peice's location has a coordinate 8 (off the board)
        continue #don't add anything to legal moves
      try:
        if pieceColor == "B" and piecePositions[pieceY+1,pieceX+xOffset] == " " and pieceX+xOffset >= 0: #if this is a legal move for black and the legal move is on the board
-         print("testing coords: "+str(pieceY+1)+","+str(pieceX+xOffset))
          emptyAdjacent.append((pieceY,pieceX,pieceY+1,pieceX+xOffset)) #append the piece and a possible location
      except: #a possible peice's location has a coordinate 8 (off the board)
        continue #don't add anything to legal moves
   return emptyAdjacent
 #possible moves are stored in the following format:
 #piece's current Y, piece's current X, piece's possible new Y, piece's possible new X
+#the origin is at the top left corner. So the top right corner is (7,0) and the bottom left corner is (0,7)
 #each move is a list containing that information, so emptyAdjacent is a list of lists
   
 #user commands from here on
