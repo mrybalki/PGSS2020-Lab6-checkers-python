@@ -58,7 +58,7 @@ def checkOnePieceMoves(piecePositions,coords):
          emptyAdjacent.append((pieceY,pieceX,pieceY+1,pieceX+xOffset)) #append the piece and a possible location
      except: #a possible peice's location has a coordinate 8 (off the board)
        continue #don't add anything to legal moves
-  print(emptyAdjacent)
+  return emptyAdjacent
 #possible moves are stored in the following format:
 #piece's current Y, piece's current X, piece's possible new Y, piece's possible new X
 #each move is a list containing that information, so emptyAdjacent is a list of lists
