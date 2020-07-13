@@ -1,17 +1,21 @@
 import numpy as np
+gamePGN = ""
 
 gameOn = True
-cmdDictionary = {"help": "helpCmd()", #list of user commands
+#dictionary with user inputs and corresponding commands
+cmdDictionary = {"help": "helpCmd()",
                  "quit": "gameOn = False",
                  "rules": "rulesCmd()",
                  "start game": "startCmd()",
                  "display board": "displayBoard(piece_positions)",
                  "display empty board": "displayBoard()",
                  "move": "attemptMove(coords,desiredCoords)",
-                 "reset pieces": "piece_positions = setUpPieces()"
+                 "reset board": "piece_positions = setUpPieces()",
+                 "show PGN":"pgnCmd()"
 }
 
-def displayBoard(piece_positions=np.full((8,8)," ")): #print board
+#print the current board
+def displayBoard(piece_positions=np.full((8,8)," ")): 
     board = createBackground() #creates background for the board
     emptyLine = "\n  |---|---|---|---|---|---|---|---|\n"
     outputDisplay = ""
@@ -28,13 +32,15 @@ def displayBoard(piece_positions=np.full((8,8)," ")): #print board
     outputDisplay+="    a   b   c   d   e   f   g   h"
     print(outputDisplay)
    
-def createBackground(): #creates background for the board
+#creates background for the board (called in displayBoard())
+def createBackground(): 
     outputBackground = np.full((8,8), ".")
     outputBackground[::2,::2] = " "
     outputBackground[1::2,1::2] = " "
     return outputBackground
 
-def setUpPieces(): #creates 8x8 array of piece chars
+#creates 8x8 array of piece chars
+def setUpPieces(): 
     pieceOutput = np.full((8,8), " ")
     pieceOutput[0,1::2] = "b"
     pieceOutput[1,::2] = "b"
@@ -46,7 +52,8 @@ def setUpPieces(): #creates 8x8 array of piece chars
     #pieceOutput[2,7] = 'r'
     return pieceOutput
 
-def checkNormalPieceMoves(piecePositions,coords): #finds all possible moves for a normal piece
+#returns all possible moves a normal piece can make
+def checkNormalPieceMoves(piecePositions,coords): 
     pieceColor = piecePositions[coords[0],coords[1]]
     emptyAdjacent = []
     pieceY = coords[0]
@@ -62,12 +69,13 @@ def checkNormalPieceMoves(piecePositions,coords): #finds all possible moves for 
                 emptyAdjacent.append((pieceY,pieceX,pieceY+1,pieceX+xOffset)) #append the piece and a possible location
         except: #a possible peice's location has a coordinate 8 (off the board)
             continue #don't add anything to legal moves
-    return emptyAdjacent
+    return list(emptyAdjacent)
 #possible moves are stored in the following format:
 #piece's current Y, piece's current X, piece's possible new Y, piece's possible new X
 #the origin is at the top left corner. So the top right corner is (0,7) and the bottom left corner is (7,0)
 #each move is a list containing that information, so emptyAdjacent is a list of lists
 
+#returns all possible moves a king could make
 def checkKingPieceMoves(piecePositions,coords):
     emptyAdjacent = []
     pieceY = coords[0]
@@ -79,8 +87,9 @@ def checkKingPieceMoves(piecePositions,coords):
                     emptyAdjacent.append((pieceY,pieceX,pieceY+yOffset,pieceX+xOffset))
             except: #a piece's possible new location is off the board
                 continue #do nothing
-    return emptyAdjacent
+    return list(emptyAdjacent)
 
+#if a normal piece has reached the end of the board, it is replaced with a king
 def checkPromote(desiredCoords):
     dY, dX = desiredCoords
     if piece_positions[dY,dX] == 'r' and desiredCoords[0] == 0: #red peice has reached the top of the board
@@ -88,40 +97,57 @@ def checkPromote(desiredCoords):
     if piece_positions[dY,dX] == 'b' and desiredCoords[0] == 7: #black piece has reached the bottom of the board
         piece_positions[dY,dX] = 'B' #king
 
+#attempts a player's move
 def attemptMove(coords, desiredCoords):
+    global gamePGN
     pieceY, pieceX = coords
     destY, destX = desiredCoords
-    if piece_positions[pieceY,pieceX] in ('r','b'): #if the piece is normal...
+    if piece_positions[pieceY,pieceX] in ('r','b'):
         pMoves = checkNormalPieceMoves(piece_positions,coords)
         if (pieceY, pieceX, destY, destX) in pMoves:
             piece_positions[destY,destX] = piece_positions[pieceY,pieceX]
             piece_positions[pieceY,pieceX] = " "
             checkPromote(desiredCoords)
             displayBoard(piece_positions)
+            gamePGN = updatePGN(gamePGN, pieceY,pieceX,destY,destX)
         else:
             print("chessbot: this isn't a valid move")
-    elif piece_positions[pieceY,pieceX] in ('R','B'): # if the piece is a king...
+    elif piece_positions[pieceY,pieceX] in ('R','B'):
         pMoves = checkKingPieceMoves(piece_positions,coords)
         if (pieceY, pieceX, destY, destX) in pMoves:
             piece_positions[destY,destX] = piece_positions[pieceY,pieceX]
             piece_positions[pieceY,pieceX] = " "
             displayBoard(piece_positions)
+            gamePGN = updatePGN(gamePGN, pieceY,pieceX,destY,destX)
         else:
             print("chessbot: this isn't a valid move")
 
+#converts user input coordinates to array indices
 def convertCoords(coordStr):
     output = []
     for item in coordStr:
-        if item.isdigit(): #item contains a digit
+        if item.isdigit(): #item is a digit
             output.append(8-int(item))
-        else: #item contains a chr
+        else: #item is a chr
             output.append(ord(item)-97)
     return output[::-1]
-#a has an ascii value of 53, increments by 1 for following letters
+#a has an ascii value of 97, increments by 1 for following letters
+
+#updates the record of all moves played in a game
+def updatePGN(PGN,pY,pX,dY,dX,flags=["move"]):
+    flagDict = {"move":"m",
+                "take":'t',
+                "king":'k'}
+    PGN+=str(pY)+str(pX)+">"+str(dY)+str(dX)
+    #print(type(flags))
+    for flag in flags:
+      print(flag)
+      PGN+=flagDict[str(flag)]
+    return PGN+"\n"
 
 #USER COMMANDS FROM HERE ON
 def helpCmd():
-    print("COMMANDS:\n    quit: closes game\n    rules: prints rules\n    start game: starts a game\n    display board: displays the checkers board\n    display empty board: displayes an empty chess board(temporary command)\n    reset pieces: resets the board")
+    print("COMMANDS:\n    quit: closes game\n    rules: prints rules\n    start game: starts a game\n    display board: displays the checkers board\n    display empty board: displayes an empty chess board(temporary command)\n    reset board: resets the board")
 
 def rulesCmd():
     print("chessbot: the rules for our checkers game should be here")
@@ -131,6 +157,8 @@ def startCmd():
     piece_positions = setUpPieces()
     displayBoard(piece_positions)
 
+def pgnCmd():
+    print(gamePGN)
 
 #checkOnePieceMoves(piece_positions,[2,1])
 print("chessbot: hello! welcome to PGSS checkers!")
@@ -138,12 +166,12 @@ print("chessbot: for commands and rules, type \"help\"")
 while gameOn: #prompt user for input and execute user's commands until stopped
     #print(gameOn)
     userCmd = input("you: ")
-    try:
-        if userCmd[:4] == "move": #if a move is being made
-            userCoords = convertCoords(userCmd[5:7])
-            userDestination = convertCoords(userCmd[8:10])
-            attemptMove(userCoords,userDestination)
-        else:
-            exec(cmdDictionary[userCmd]) #execute user's command
-    except:
-        print("chessbot: "+userCmd+" isn't a valid command. If you are trying to display a board, make sure you have started a game")
+    #try:
+    if userCmd[:4] == "move": #if a move is being made
+        userCoords = convertCoords(userCmd[5:7])
+        userDestination = convertCoords(userCmd[8:10])
+        attemptMove(userCoords,userDestination)
+    else:
+        exec(cmdDictionary[userCmd]) #execute user's command
+    #except:
+        #print("chessbot: "+userCmd+" isn't a valid command. If you are trying to display a board, make sure you have started a game")
