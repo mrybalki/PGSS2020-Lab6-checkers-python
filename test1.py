@@ -94,22 +94,30 @@ def checkPromote(desiredCoords):
     dY, dX = desiredCoords
     if piece_positions[dY,dX] == 'r' and desiredCoords[0] == 0: #red peice has reached the top of the board
         piece_positions[dY,dX] = 'R' #king
+        return True
     if piece_positions[dY,dX] == 'b' and desiredCoords[0] == 7: #black piece has reached the bottom of the board
         piece_positions[dY,dX] = 'B' #king
+        return True
+    return False
 
 #attempts a player's move
 def attemptMove(coords, desiredCoords):
     global gamePGN
     pieceY, pieceX = coords
     destY, destX = desiredCoords
+    if (gamePGN.count("\n")%2 == 0 and piece_positions[pieceY,pieceX].lower() == 'b') or (gamePGN.count("\n")%2 == 1 and piece_positions[pieceY,pieceX].lower() == 'r'):
+        print("chessbot: You cannot move this piece, it is not that player's turn.")
+        return None
     if piece_positions[pieceY,pieceX] in ('r','b'):
         pMoves = checkNormalPieceMoves(piece_positions,coords)
         if (pieceY, pieceX, destY, destX) in pMoves:
             piece_positions[destY,destX] = piece_positions[pieceY,pieceX]
             piece_positions[pieceY,pieceX] = " "
-            checkPromote(desiredCoords)
+            if checkPromote(desiredCoords):
+                gamePGN = updatePGN(gamePGN, pieceY,pieceX,destY,destX,["move","king"])
+            else:
+                gamePGN = updatePGN(gamePGN, pieceY,pieceX,destY,destX)
             displayBoard(piece_positions)
-            gamePGN = updatePGN(gamePGN, pieceY,pieceX,destY,destX)
         else:
             print("chessbot: this isn't a valid move")
     elif piece_positions[pieceY,pieceX] in ('R','B'):
@@ -122,15 +130,20 @@ def attemptMove(coords, desiredCoords):
         else:
             print("chessbot: this isn't a valid move")
 
-#converts user input coordinates to array indices
-def convertCoords(coordStr):
+#converts between user coordinates and array indices
+def convertCoords(coordStr,toIndices = True):
     output = []
-    for item in coordStr:
-        if item.isdigit(): #item is a digit
-            output.append(8-int(item))
-        else: #item is a chr
-            output.append(ord(item)-97)
+    if toIndices:
+        for item in coordStr:
+            if item.isdigit(): #item is a digit
+                output.append(8-int(item))
+            else: #item is a chr
+                output.append(ord(item)-97)
+    elif not toIndices:
+        output.append(8-int(coordStr[0]))
+        output.append(chr(int(coordStr[1])+97))
     return output[::-1]
+        
 #a has an ascii value of 97, increments by 1 for following letters
 
 #updates the record of all moves played in a game
@@ -138,11 +151,15 @@ def updatePGN(PGN,pY,pX,dY,dX,flags=["move"]):
     flagDict = {"move":"m",
                 "take":'t',
                 "king":'k'}
-    PGN+=str(pY)+str(pX)+">"+str(dY)+str(dX)
-    #print(type(flags))
+    pX, pY = convertCoords(str(pY)+str(pX),False)
+    dX, dY = convertCoords(str(dY)+str(dX),False)
+    if PGN.count("\n") < 9: #add 0 for 1 digit number moves
+        PGN+="0"
+    PGN+=str(PGN.count("\n")+1)+". " #add move number
+    PGN+='B ' if PGN.count("\n") %2 else 'R ' #add player
+    PGN+=pX+str(pY)+dX+str(dY) #add coordinates
     for flag in flags:
-      print(flag)
-      PGN+=flagDict[str(flag)]
+      PGN+=flagDict[str(flag)] #add flags
     return PGN+"\n"
 
 #USER COMMANDS FROM HERE ON
@@ -171,6 +188,9 @@ while gameOn: #prompt user for input and execute user's commands until stopped
         userCoords = convertCoords(userCmd[5:7])
         userDestination = convertCoords(userCmd[8:10])
         attemptMove(userCoords,userDestination)
+    elif userCmd[:5] == "paste": #if a PGN is being pasted
+        gamePGN = userCmD[5:]
+        print(gamePGN)
     else:
         exec(cmdDictionary[userCmd]) #execute user's command
     #except:
