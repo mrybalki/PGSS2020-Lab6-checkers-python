@@ -1,3 +1,11 @@
+def legalMoves(piecePositions, playerColor):
+  allMoves = []
+  for x in range(0, 8):
+    for y in range(0, 8):
+      if piecePositions[y, x] == playerColor:
+        if len(checkOnePieceMoves(piecePositions, [y,x])) > 0:
+            allMoves.append(checkOnePieceMoves(piecePositions, [y,x]))
+  return allMoves  
 def makeMove(piecePositions, playerColor, pType="Computer",fromCoords = [], toCoords=[]):
     possibleMoves = legalMoves(piecePositions, playerColor) #get all possible moves for this player based on color piece
     if(pType == "Human"):
