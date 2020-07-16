@@ -52,25 +52,16 @@ def checkJumps(piecePositions, pieceColor, coords):
     pieceX = coords[1]
     pieceY = coords[0]
     emptyAdjacent = []
-    level2jumps = []
     for xOffset in range(-1, 2, 2):
         try:
             if xOffset < 0:
                 newOffset = -2
                 if pieceColor.upper() == "R" and piecePositions[pieceY-1, pieceX+xOffset].upper() == "B" and piecePositions[pieceY-2, pieceX+newOffset] == " " and pieceX+newOffset >=0:
                     emptyAdjacent.append([pieceY, pieceX, pieceY-2, pieceX+newOffset])
-                    temp = checkJumps(piecePositions, pieceColor, [pieceY-2, pieceX+newOffset])
-                    if temp:
-                        if temp not in level2jumps:
-                            level2jumps.append(list(temp))
             else:
                 newOffset = 2
                 if pieceColor.upper() == "R" and piecePositions[pieceY-1, pieceX+xOffset].upper() == "B" and piecePositions[pieceY-2, pieceX+newOffset] == " " and pieceX+newOffset >=0:
                     emptyAdjacent.append([pieceY, pieceX, pieceY-2, pieceX+newOffset])
-                    temp = checkJumps(piecePositions, pieceColor, [pieceY-2, pieceX+newOffset])
-                    if temp:
-                        if temp not in level2jumps:
-                            level2jumps.append(list(temp))
         except:
             continue
         try:
@@ -78,27 +69,13 @@ def checkJumps(piecePositions, pieceColor, coords):
                 newOffset = -2
                 if pieceColor.upper() == "B" and piecePositions[pieceY+1, pieceX+xOffset].upper() == "R" and piecePositions[pieceY+2, pieceX+newOffset] == " " and pieceX+newOffset >=0:
                     emptyAdjacent.append([pieceY, pieceX, pieceY+2, pieceX+newOffset])
-                    temp = checkJumps(piecePositions, pieceColor, [pieceY+2, pieceX+newOffset])
-                    if temp:
-                        if temp not in level2jumps:
-                            level2jumps.append(list(temp))
             else:
                 newOffset = 2
                 if pieceColor.upper() == "B" and piecePositions[pieceY+1, pieceX+xOffset].upper() == "R" and piecePositions[pieceY+2, pieceX+newOffset] == " " and pieceX+newOffset >=0:
                     emptyAdjacent.append([pieceY, pieceX, pieceY+2, pieceX+newOffset])
-                    temp =  checkJumps(piecePositions, pieceColor, [pieceY+2, pieceX+newOffset])
-                    if temp:
-                        if temp not in level2jumps:
-                            level2jumps.append(list(temp))
         except:
             continue
-    if not level2jumps and not emptyAdjacent:
+    if not emptyAdjacent:
         return []
     else:
-        for l in level2jumps:
-            for x in l:
-                if x not in emptyAdjacent:
-                    emptyAdjacent.append(x)
-        for i in range(0, len(emptyAdjacent)):
-            print(emptyAdjacent[i])
         return emptyAdjacent
